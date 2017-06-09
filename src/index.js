@@ -4,6 +4,7 @@
 'use strict';
 
 let Client = require('ssh2').Client;
+let pathModule = require('path');
 
 let SftpClient = function(){
     this.client = new Client();
@@ -47,6 +48,40 @@ SftpClient.prototype.list = function(path) {
                 resolve(list);
             });
         } else {
+            reject(Error('sftp connect error'));
+        }
+    });
+};
+
+
+/**
+ * Retrieves a file information
+ *
+ * @param {String} path, a string containing the path to a file
+ * @return {Promise} entry
+ */
+SftpClient.prototype.stat = function(path) {
+    return new Promise((resolve, reject) => {
+        let sftp = this.sftp;
+        if (sftp) {
+            sftp.stat(path, (err, item) => {
+                if (err) {
+                    reject(err);
+                    return false;
+                }
+                // reset file info
+                const info = {
+                    type: '-',
+                    name: pathModule.basename(path),
+                    size: item.size,
+                    modifyTime: item.mtime * 1000,
+                    accessTime: item.atime * 1000,
+                    owner: item.uid,
+                    group: item.gid
+                };
+            resolve(info);
+        });
+        } else {
             reject('sftp connect error');
         }
     });
@@ -77,7 +112,7 @@ SftpClient.prototype.get = function(path, useCompression, encoding) {
                 reject(err);
             }
         } else {
-            reject('sftp connect error');
+            reject(Error('sftp connect error'));
         }
     });
 };
@@ -120,7 +155,7 @@ SftpClient.prototype.put = function(input, remotePath, useCompression, encoding)
             }
             data = input.pipe(stream);
         } else {
-            reject('sftp connect error');
+            reject(Error('sftp connect error'));
         }
     });
 };
@@ -164,7 +199,7 @@ SftpClient.prototype.mkdir = function(path, recursive) {
             };
             return mkdir();
         } else {
-            reject('sftp connect error');
+            reject(Error('sftp connect error'));
         }
     });
 };
@@ -235,7 +270,7 @@ SftpClient.prototype.rmdir = function(path, recursive) {
             return rmdir(path).then(() => {resolve()})
                         .catch((err) => {reject(err)});
         } else {
-            reject('sftp connect error');
+            reject(Error('sftp connect error'));
         }
     });
 };
@@ -253,7 +288,7 @@ SftpClient.prototype.delete = function(path) {
                 resolve();
             });
         } else {
-            reject('sftp connect error');
+            reject(Error('sftp connect error'));
         }
     });
 };
@@ -271,7 +306,7 @@ SftpClient.prototype.rename = function(srcPath, remotePath) {
                 resolve();
             });
         } else {
-            reject('sftp connect error');
+            reject(Error('sftp connect error'));
         }
     });
 }
