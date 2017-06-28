@@ -103,6 +103,9 @@ connection config you will see [here](https://github.com/mscdex/ssh2#user-conten
 ### FAQ
 
 ### Log
+#### V1.2.0
+    - new feature: stat
+
 #### V1.1.0
     - fix: add encoding control support for binary stream
 
